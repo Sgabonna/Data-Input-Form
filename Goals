@@ -1,0 +1,73 @@
+# Data-Input-Form
+
+import PySimpleGUI as sg
+import pandas as pd
+import openpyxl
+
+sg.theme("DarkBlue")
+sg.set_options(font=('Courier New', 12))
+
+#Convert Excel DAte into
+from datetime import date
+
+today = date.today().strftime("%d-%m-%Y")
+
+EXCEL_FILE = 'Goal_Tracker.xlsx'
+df = pd.read_excel(EXCEL_FILE)
+
+df.loc[df['Date'] <= today]
+
+df=df.drop('Event',1)
+df.insert(2,'Event',events['Event'].tolist()*(len(df['Event'])/len(events['Event'].tolist())))
+
+#Each field in the frame inputs a string into the excel sheet
+frame_1 = [[sg.Text('Gym:     '), sg.InputText(key='Gym', size=(4, 1))], 
+    [sg.Text('Swim:    '), sg.InputText(key='Swim', size=(4, 1))], 
+    [sg.Text('Bike:    '), sg.InputText(key='Bike', size=(4, 1))],
+    [sg.Text('Meditate:'), sg.InputText(key='Meditate', size=(4, 1))],
+    [sg.Text('Walk:    '), sg.InputText(key='Walk', size=(4, 1))]]
+frame_2 = [[sg.Text('ProjectT:'), sg.InputText(key='ProjectTime', size=(4, 1))],
+    [sg.Text('ProjectN:'), sg.InputText(key='ProjectName', size=(4, 1))],
+    [sg.Text('Reading: '), sg.InputText(key='Reading', size=(4, 1))], 
+    [sg.Text('AudioB:  '), sg.InputText(key='Audio', size=(4, 1))],
+    [sg.Text('Podcast: '), sg.InputText(key='Podcast', size=(4, 1))]]
+frame_3 = [[sg.Text('Plan:    '), sg.InputText(key='Plan', size=(4, 1))],
+    [sg.Text('Shopping:'), sg.InputText(key='Shopping', size=(4, 1))],
+    [sg.Text('MealPrep:'), sg.InputText(key='MealPrep', size=(4, 1))], 
+    [sg.Text('Chores:  '), sg.InputText(key='Chores', size=(4, 1))],
+    [sg.Text('SelfCare:'), sg.InputText(key='SelfCare', size=(4, 1))]]
+frame_4 = [[sg.Text('Social:  '), sg.InputText(key='Social', size=(4, 1))],
+    [sg.Text('YouTube: '), sg.InputText(key='YouTube', size=(4, 1))],
+    [sg.Text('Alcohol: '), sg.InputText(key='Alcohol', size=(4, 1))], 
+    [sg.Text('Weed:    '), sg.InputText(key='Weed', size=(4, 1))],
+    [sg.Text('Games:   '), sg.InputText(key='Games', size=(4, 1))]]
+
+
+layout = [
+    [sg.InputText(today, key='Date')],
+    [sg.Frame('Exercise', frame_1, pad=(0, (14, 5))),
+     sg.Frame('Learning', frame_2, pad=(0, (14, 5))),
+     sg.Frame('Organise', frame_3, pad=(0, (14, 5))),
+     sg.Frame('Entertain', frame_4, pad=(0, (14, 5)))],
+    [sg.Submit(),sg.Cancel(), sg.Button('Clear')],
+]
+
+window = sg.Window('Daily Goal Input', layout)
+
+def clear_input():
+    for key in values:
+        window[key]('')
+    return None
+
+while True:
+    event, values = window.read()
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        break
+    if event == 'Clear':
+        clear_input()
+    if event == 'Submit':
+        df = df.append(values, ignore_index=True)
+        df.to_excel(EXCEL_FILE, index=False)
+        sg.popup('Data saved!')
+        clear_input()
+window.close()
